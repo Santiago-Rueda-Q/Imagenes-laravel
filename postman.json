@@ -1,0 +1,492 @@
+{
+  "info": {
+    "name": "Events API - Laravel",
+    "description": "API para gestión de eventos con imágenes en múltiples tamaños",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "1. Listar Eventos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events?per_page=10&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "description": "Número de elementos por página"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Página actual"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true",
+                  "description": "Filtrar por eventos activos",
+                  "disabled": true
+                },
+                {
+                  "key": "upcoming",
+                  "value": "true",
+                  "description": "Filtrar eventos próximos",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Respuesta Exitosa",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/events",
+                  "host": ["{{base_url}}"],
+                  "path": ["events"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"current_page\": 1,\n    \"data\": [\n      {\n        \"id\": 1,\n        \"title\": \"Conferencia de Tecnología 2025\",\n        \"description\": \"Una conferencia anual sobre las últimas tendencias en tecnología\",\n        \"location\": \"Centro de Convenciones\",\n        \"event_date\": \"2025-08-15T09:00:00.000000Z\",\n        \"color\": \"#3B82F6\",\n        \"image_small\": \"events/images/1234567890_abc123_small.webp\",\n        \"image_medium\": \"events/images/1234567890_abc123_medium.webp\",\n        \"image_large\": \"events/images/1234567890_abc123_large.webp\",\n        \"image_small_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_small.webp\",\n        \"image_medium_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_medium.webp\",\n        \"image_large_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_large.webp\",\n        \"is_active\": true,\n        \"created_at\": \"2025-07-15T10:30:00.000000Z\",\n        \"updated_at\": \"2025-07-15T10:30:00.000000Z\"\n      }\n    ],\n    \"first_page_url\": \"http://localhost:8000/api/events?page=1\",\n    \"from\": 1,\n    \"last_page\": 1,\n    \"last_page_url\": \"http://localhost:8000/api/events?page=1\",\n    \"links\": [],\n    \"next_page_url\": null,\n    \"path\": \"http://localhost:8000/api/events\",\n    \"per_page\": 10,\n    \"prev_page_url\": null,\n    \"to\": 1,\n    \"total\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Crear Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Workshop de Laravel",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Aprende las mejores prácticas para desarrollar aplicaciones web con Laravel",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "Aula Magna Universidad",
+                  "type": "text"
+                },
+                {
+                  "key": "event_date",
+                  "value": "2025-09-10 14:00:00",
+                  "type": "text"
+                },
+                {
+                  "key": "color",
+                  "value": "#EF4444",
+                  "type": "text"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/events",
+              "host": ["{{base_url}}"],
+              "path": ["events"]
+            }
+          },
+          "response": [
+            {
+              "name": "Creación Exitosa",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Workshop de Laravel",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/events",
+                  "host": ["{{base_url}}"],
+                  "path": ["events"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Event created successfully\",\n  \"data\": {\n    \"id\": 2,\n    \"title\": \"Workshop de Laravel\",\n    \"description\": \"Aprende las mejores prácticas para desarrollar aplicaciones web con Laravel\",\n    \"location\": \"Aula Magna Universidad\",\n    \"event_date\": \"2025-09-10T14:00:00.000000Z\",\n    \"color\": \"#EF4444\",\n    \"image_small\": \"events/images/1721045400_xyz789_small.webp\",\n    \"image_medium\": \"events/images/1721045400_xyz789_medium.webp\",\n    \"image_large\": \"events/images/1721045400_xyz789_large.webp\",\n    \"image_small_url\": \"http://localhost:8000/storage/events/images/1721045400_xyz789_small.webp\",\n    \"image_medium_url\": \"http://localhost:8000/storage/events/images/1721045400_xyz789_medium.webp\",\n    \"image_large_url\": \"http://localhost:8000/storage/events/images/1721045400_xyz789_large.webp\",\n    \"is_active\": true,\n    \"created_at\": \"2025-07-15T12:30:00.000000Z\",\n    \"updated_at\": \"2025-07-15T12:30:00.000000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error de Validación",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/events",
+                  "host": ["{{base_url}}"],
+                  "path": ["events"]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Validation errors\",\n  \"errors\": {\n    \"title\": [\"The title field is required.\"],\n    \"description\": [\"The description field is required.\"],\n    \"location\": [\"The location field is required.\"],\n    \"event_date\": [\"The event date field is required.\"],\n    \"color\": [\"The color field is required.\"],\n    \"image\": [\"The image field is required.\"]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Mostrar Evento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/1",
+              "host": ["{{base_url}}"],
+              "path": ["events", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Evento Encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/events/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["events", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Conferencia de Tecnología 2025\",\n    \"description\": \"Una conferencia anual sobre las últimas tendencias en tecnología y desarrollo de software.\",\n    \"location\": \"Centro de Convenciones\",\n    \"event_date\": \"2025-08-15T09:00:00.000000Z\",\n    \"color\": \"#3B82F6\",\n    \"image_small\": \"events/images/1234567890_abc123_small.webp\",\n    \"image_medium\": \"events/images/1234567890_abc123_medium.webp\",\n    \"image_large\": \"events/images/1234567890_abc123_large.webp\",\n    \"image_small_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_small.webp\",\n    \"image_medium_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_medium.webp\",\n    \"image_large_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_large.webp\",\n    \"is_active\": true,\n    \"created_at\": \"2025-07-15T10:30:00.000000Z\",\n    \"updated_at\": \"2025-07-15T10:30:00.000000Z\"\n  }\n}"
+            },
+            {
+              "name": "Evento No Encontrado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/events/999",
+                  "host": ["{{base_url}}"],
+                  "path": ["events", "999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"message\": \"No query results for model [App\\\\Models\\\\Event] 999\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Actualizar Evento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia de Tecnología 2025 - Actualizada\",\n  \"description\": \"Una conferencia anual sobre las últimas tendencias en tecnología y desarrollo de software - Descripción actualizada\",\n  \"location\": \"Centro de Convenciones Principal\",\n  \"event_date\": \"2025-08-15 10:00:00\",\n  \"color\": \"#10B981\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/1",
+              "host": ["{{base_url}}"],
+              "path": ["events", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Actualización Exitosa",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Conferencia de Tecnología 2025 - Actualizada\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/events/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["events", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Event updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Conferencia de Tecnología 2025 - Actualizada\",\n    \"description\": \"Una conferencia anual sobre las últimas tendencias en tecnología y desarrollo de software - Descripción actualizada\",\n    \"location\": \"Centro de Convenciones Principal\",\n    \"event_date\": \"2025-08-15T10:00:00.000000Z\",\n    \"color\": \"#10B981\",\n    \"image_small\": \"events/images/1234567890_abc123_small.webp\",\n    \"image_medium\": \"events/images/1234567890_abc123_medium.webp\",\n    \"image_large\": \"events/images/1234567890_abc123_large.webp\",\n    \"image_small_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_small.webp\",\n    \"image_medium_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_medium.webp\",\n    \"image_large_url\": \"http://localhost:8000/storage/events/images/1234567890_abc123_large.webp\",\n    \"is_active\": true,\n    \"created_at\": \"2025-07-15T10:30:00.000000Z\",\n    \"updated_at\": \"2025-07-15T14:15:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "5. Actualizar Evento con Imagen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-HTTP-Method-Override",
+                "value": "PUT"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Conferencia de Tecnología 2025 - Con Nueva Imagen",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Descripción actualizada con nueva imagen",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "Centro de Convenciones Principal",
+                  "type": "text"
+                },
+                {
+                  "key": "event_date",
+                  "value": "2025-08-15 10:00:00",
+                  "type": "text"
+                },
+                {
+                  "key": "color",
+                  "value": "#8B5CF6",
+                  "type": "text"
+                },
+                {
+                  "key": "is_active",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/events/1",
+              "host": ["{{base_url}}"],
+              "path": ["events", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Actualización con Imagen Exitosa",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Conferencia de Tecnología 2025 - Con Nueva Imagen",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/events/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["events", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Event updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Conferencia de Tecnología 2025 - Con Nueva Imagen\",\n    \"description\": \"Descripción actualizada con nueva imagen\",\n    \"location\": \"Centro de Convenciones Principal\",\n    \"event_date\": \"2025-08-15T10:00:00.000000Z\",\n    \"color\": \"#8B5CF6\",\n    \"image_small\": \"events/images/1721049600_def456_small.webp\",\n    \"image_medium\": \"events/images/1721049600_def456_medium.webp\",\n    \"image_large\": \"events/images/1721049600_def456_large.webp\",\n    \"image_small_url\": \"http://localhost:8000/storage/events/images/1721049600_def456_small.webp\",\n    \"image_medium_url\": \"http://localhost:8000/storage/events/images/1721049600_def456_medium.webp\",\n    \"image_large_url\": \"http://localhost:8000/storage/events/images/1721049600_def456_large.webp\",\n    \"is_active\": true,\n    \"created_at\": \"2025-07-15T10:30:00.000000Z\",\n    \"updated_at\": \"2025-07-15T15:00:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "6. Eliminar Evento",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/1",
+              "host": ["{{base_url}}"],
+              "path": ["events", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Eliminación Exitosa",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/events/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["events", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Event deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Filtros Especiales",
+      "item": [
+        {
+          "name": "Eventos Activos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events?is_active=true",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "is_active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eventos Próximos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events?upcoming=true",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "upcoming",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eventos Pasados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events?past=true",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "past",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
