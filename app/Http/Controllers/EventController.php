@@ -18,37 +18,55 @@ class EventController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Event::query();
+        try {
+            $query = Event::query();
 
-        // Filtros opcionales
-        if ($request->has('is_active')) {
-            $query->where('is_active', $request->boolean('is_active'));
+            // Filtros opcionales
+            if ($request->has('is_active')) {
+                $query->where('is_active', $request->boolean('is_active'));
+            }
+
+            if ($request->has('upcoming')) {
+                $query->upcoming();
+            }
+
+            if ($request->has('past')) {
+                $query->past();
+            }
+
+            // Paginación
+            $perPage = $request->input('per_page', 10);
+            $events = $query->orderBy('event_date', 'desc')->paginate($perPage);
+
+            // Agregar URLs de imágenes
+            $events->getCollection()->transform(function ($event) {
+                $event->image_small_url = $event->image_small_url;
+                $event->image_medium_url = $event->image_medium_url;
+                $event->image_large_url = $event->image_large_url;
+                return $event;
+            });
+
+            // Retornar la estructura correcta
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'data' => $events->items(), // Los eventos reales
+                    'current_page' => $events->currentPage(),
+                    'last_page' => $events->lastPage(),
+                    'per_page' => $events->perPage(),
+                    'total' => $events->total(),
+                    'from' => $events->firstItem(),
+                    'to' => $events->lastItem(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading events: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
         }
-
-        if ($request->has('upcoming')) {
-            $query->upcoming();
-        }
-
-        if ($request->has('past')) {
-            $query->past();
-        }
-
-        // Paginación
-        $perPage = $request->input('per_page', 10);
-        $events = $query->orderBy('event_date', 'desc')->paginate($perPage);
-
-        // Agregar URLs de imágenes
-        $events->getCollection()->transform(function ($event) {
-            $event->image_small_url = $event->image_small_url;
-            $event->image_medium_url = $event->image_medium_url;
-            $event->image_large_url = $event->image_large_url;
-            return $event;
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $events,
-        ]);
     }
 
     /**
@@ -63,7 +81,7 @@ class EventController extends Controller
             'event_date' => 'required|date',
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'boolean',
+            'is_active' => 'required|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -139,7 +157,7 @@ class EventController extends Controller
             'event_date' => 'sometimes|required|date',
             'color' => 'sometimes|required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'boolean',
+            'is_active' => 'required|boolean',
         ]);
 
         if ($validator->fails()) {

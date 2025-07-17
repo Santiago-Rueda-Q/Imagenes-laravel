@@ -14,6 +14,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::apiResource('events', EventController::class);
+
 // Rutas para eventos
 Route::prefix('events')->group(function () {
     Route::get('/', [EventController::class, 'index']);

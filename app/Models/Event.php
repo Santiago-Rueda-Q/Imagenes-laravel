@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class Event extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -19,31 +21,65 @@ class Event extends Model
         'image_small',
         'image_medium',
         'image_large',
-        'is_active',
+        'is_active'
     ];
 
     protected $casts = [
-        'event_date' => 'datetime',
+        'event_date' => 'date',
         'is_active' => 'boolean',
     ];
 
-    // Accessor para obtener las URLs completas de las imágenes
+    /**
+     * Scope para eventos próximos
+     */
+    public function scopeUpcoming($query)
+    {
+        return $query->where('event_date', '>=', Carbon::today());
+    }
+
+    /**
+     * Scope para eventos pasados
+     */
+    public function scopePast($query)
+    {
+        return $query->where('event_date', '<', Carbon::today());
+    }
+
+    /**
+     * Scope para eventos activos
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Accessor para URL de imagen pequeña
+     */
     public function getImageSmallUrlAttribute()
     {
         return $this->image_small ? Storage::url($this->image_small) : null;
     }
 
+    /**
+     * Accessor para URL de imagen mediana
+     */
     public function getImageMediumUrlAttribute()
     {
         return $this->image_medium ? Storage::url($this->image_medium) : null;
     }
 
+    /**
+     * Accessor para URL de imagen grande
+     */
     public function getImageLargeUrlAttribute()
     {
         return $this->image_large ? Storage::url($this->image_large) : null;
     }
 
-    // Método para eliminar imágenes del almacenamiento
+    /**
+     * Eliminar imágenes del almacenamiento
+     */
     public function deleteImages()
     {
         if ($this->image_small) {
@@ -57,19 +93,5 @@ class Event extends Model
         }
     }
 
-    // Scopes para filtrar eventos
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeUpcoming($query)
-    {
-        return $query->where('event_date', '>=', now());
-    }
-
-    public function scopePast($query)
-    {
-        return $query->where('event_date', '<', now());
-    }
+    
 }
