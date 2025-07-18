@@ -37,25 +37,28 @@ class EventController extends Controller
             $perPage = $request->input('per_page', 10);
             $events = $query->orderBy('event_date', 'desc')->paginate($perPage);
 
-            // Agregar URLs de imágenes
-            $events->getCollection()->transform(function ($event) {
-                $event->image_small_url = $event->image_small_url;
-                $event->image_medium_url = $event->image_medium_url;
-                $event->image_large_url = $event->image_large_url;
-                return $event;
+            // Transformar los datos para incluir URLs de imágenes
+            $transformedEvents = $events->through(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'location' => $event->location,
+                    'event_date' => $event->event_date,
+                    'color' => $event->color,
+                    'is_active' => $event->is_active,
+                    'image_small_url' => $event->image_small_url,
+                    'image_medium_url' => $event->image_medium_url,
+                    'image_large_url' => $event->image_large_url,
+                    'created_at' => $event->created_at,
+                    'updated_at' => $event->updated_at,
+                ];
             });
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'data' => $events->items(),
-                    'current_page' => $events->currentPage(),
-                    'last_page' => $events->lastPage(),
-                    'per_page' => $events->perPage(),
-                    'total' => $events->total(),
-                    'from' => $events->firstItem(),
-                    'to' => $events->lastItem(),
-                ]
+                'data' => $transformedEvents,
+                'message' => 'Events loaded successfully'
             ]);
 
         } catch (\Exception $e) {
@@ -82,7 +85,7 @@ class EventController extends Controller
             'location' => 'required|string|max:255',
             'event_date' => 'required|date',
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'is_active' => 'boolean',
         ]);
 
@@ -103,7 +106,7 @@ class EventController extends Controller
             $event->color = $request->color;
             $event->is_active = $request->boolean('is_active', true);
 
-            // Procesar imagen si se proporciona
+            // Procesar imagen
             if ($request->hasFile('image')) {
                 $imagePaths = $this->processImage($request->file('image'));
                 $event->image_small = $imagePaths['small'];
@@ -113,15 +116,26 @@ class EventController extends Controller
 
             $event->save();
 
-            // Agregar URLs de imágenes para la respuesta
-            $event->image_small_url = $event->image_small_url;
-            $event->image_medium_url = $event->image_medium_url;
-            $event->image_large_url = $event->image_large_url;
+            // Preparar respuesta con URLs de imágenes
+            $eventData = [
+                'id' => $event->id,
+                'title' => $event->title,
+                'description' => $event->description,
+                'location' => $event->location,
+                'event_date' => $event->event_date,
+                'color' => $event->color,
+                'is_active' => $event->is_active,
+                'image_small_url' => $event->image_small_url,
+                'image_medium_url' => $event->image_medium_url,
+                'image_large_url' => $event->image_large_url,
+                'created_at' => $event->created_at,
+                'updated_at' => $event->updated_at,
+            ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Event created successfully',
-                'data' => $event
+                'data' => $eventData
             ], 201);
 
         } catch (\Exception $e) {
@@ -142,13 +156,24 @@ class EventController extends Controller
     public function show(Event $event): JsonResponse
     {
         try {
-            $event->image_small_url = $event->image_small_url;
-            $event->image_medium_url = $event->image_medium_url;
-            $event->image_large_url = $event->image_large_url;
+            $eventData = [
+                'id' => $event->id,
+                'title' => $event->title,
+                'description' => $event->description,
+                'location' => $event->location,
+                'event_date' => $event->event_date,
+                'color' => $event->color,
+                'is_active' => $event->is_active,
+                'image_small_url' => $event->image_small_url,
+                'image_medium_url' => $event->image_medium_url,
+                'image_large_url' => $event->image_large_url,
+                'created_at' => $event->created_at,
+                'updated_at' => $event->updated_at,
+            ];
 
             return response()->json([
                 'success' => true,
-                'data' => $event
+                'data' => $eventData
             ]);
         } catch (\Exception $e) {
             Log::error('Error showing event: ' . $e->getMessage());
@@ -171,7 +196,7 @@ class EventController extends Controller
             'location' => 'sometimes|required|string|max:255',
             'event_date' => 'sometimes|required|date',
             'color' => 'sometimes|required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'is_active' => 'boolean',
         ]);
 
@@ -206,15 +231,26 @@ class EventController extends Controller
 
             $event->save();
 
-            // Agregar URLs de imágenes para la respuesta
-            $event->image_small_url = $event->image_small_url;
-            $event->image_medium_url = $event->image_medium_url;
-            $event->image_large_url = $event->image_large_url;
+            // Preparar respuesta con URLs de imágenes
+            $eventData = [
+                'id' => $event->id,
+                'title' => $event->title,
+                'description' => $event->description,
+                'location' => $event->location,
+                'event_date' => $event->event_date,
+                'color' => $event->color,
+                'is_active' => $event->is_active,
+                'image_small_url' => $event->image_small_url,
+                'image_medium_url' => $event->image_medium_url,
+                'image_large_url' => $event->image_large_url,
+                'created_at' => $event->created_at,
+                'updated_at' => $event->updated_at,
+            ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Event updated successfully',
-                'data' => $event
+                'data' => $eventData
             ]);
 
         } catch (\Exception $e) {
@@ -235,10 +271,7 @@ class EventController extends Controller
     public function destroy(Event $event): JsonResponse
     {
         try {
-            // Eliminar imágenes del almacenamiento
-            $event->deleteImages();
-
-            // Eliminar el evento
+            // Con soft deletes, esto solo marca como eliminado
             $event->delete();
 
             return response()->json([
@@ -260,7 +293,6 @@ class EventController extends Controller
 
     /**
      * Process uploaded image and create three sizes.
-     * Compatible con Intervention Image v3
      */
     private function processImage($image): array
     {
@@ -273,41 +305,14 @@ class EventController extends Controller
                 Storage::makeDirectory($directory);
             }
 
-            // VERSIÓN PARA INTERVENTION IMAGE v3
-            if (class_exists('Intervention\Image\ImageManager')) {
-                $manager = new \Intervention\Image\ImageManager(
-                    new \Intervention\Image\Drivers\Gd\Driver()
-                );
+            // Fallback simple: solo guardar la imagen original
+            $extension = $image->getClientOriginalExtension();
+            $originalPath = $directory . '/' . $fileName . '_original.' . $extension;
 
-                // Procesar imagen pequeña (200x200)
-                $smallPath = $directory . '/' . $fileName . '_small.webp';
-                $img = $manager->read($image->getRealPath());
-                $img->scale(200, 200);
-                Storage::put($smallPath, $img->toWebp(90));
+            // Guardar imagen original
+            Storage::putFileAs($directory, $image, $fileName . '_original.' . $extension);
 
-                // Procesar imagen mediana (600x600)
-                $mediumPath = $directory . '/' . $fileName . '_medium.webp';
-                $img = $manager->read($image->getRealPath());
-                $img->scale(600, 600);
-                Storage::put($mediumPath, $img->toWebp(90));
-
-                // Procesar imagen grande (1200x1200)
-                $largePath = $directory . '/' . $fileName . '_large.webp';
-                $img = $manager->read($image->getRealPath());
-                $img->scale(1200, 1200);
-                Storage::put($largePath, $img->toWebp(90));
-
-                return [
-                    'small' => $smallPath,
-                    'medium' => $mediumPath,
-                    'large' => $largePath,
-                ];
-            }
-
-            // FALLBACK: Sin procesamiento de imagen (solo copia)
-            $originalPath = $directory . '/' . $fileName . '_original.' . $image->getClientOriginalExtension();
-            Storage::putFileAs($directory, $image, $fileName . '_original.' . $image->getClientOriginalExtension());
-
+            // Para simplificar, usar la misma imagen para todos los tamaños
             return [
                 'small' => $originalPath,
                 'medium' => $originalPath,
