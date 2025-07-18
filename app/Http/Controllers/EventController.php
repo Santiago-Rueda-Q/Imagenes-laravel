@@ -8,8 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -22,15 +21,15 @@ class EventController extends Controller
             $query = Event::query();
 
             // Filtros opcionales
-            if ($request->has('is_active')) {
+            if ($request->has('is_active') && $request->is_active !== null) {
                 $query->where('is_active', $request->boolean('is_active'));
             }
 
-            if ($request->has('upcoming')) {
+            if ($request->has('upcoming') && $request->upcoming) {
                 $query->upcoming();
             }
 
-            if ($request->has('past')) {
+            if ($request->has('past') && $request->past) {
                 $query->past();
             }
 
@@ -46,11 +45,10 @@ class EventController extends Controller
                 return $event;
             });
 
-            // Retornar la estructura correcta
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'data' => $events->items(), // Los eventos reales
+                    'data' => $events->items(),
                     'current_page' => $events->currentPage(),
                     'last_page' => $events->lastPage(),
                     'per_page' => $events->perPage(),
@@ -61,6 +59,10 @@ class EventController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error loading events: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error loading events: ' . $e->getMessage(),
@@ -80,8 +82,8 @@ class EventController extends Controller
             'location' => 'required|string|max:255',
             'event_date' => 'required|date',
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'required|boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_active' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -123,6 +125,10 @@ class EventController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            Log::error('Error creating event: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating event: ' . $e->getMessage()
@@ -135,14 +141,23 @@ class EventController extends Controller
      */
     public function show(Event $event): JsonResponse
     {
-        $event->image_small_url = $event->image_small_url;
-        $event->image_medium_url = $event->image_medium_url;
-        $event->image_large_url = $event->image_large_url;
+        try {
+            $event->image_small_url = $event->image_small_url;
+            $event->image_medium_url = $event->image_medium_url;
+            $event->image_large_url = $event->image_large_url;
 
-        return response()->json([
-            'success' => true,
-            'data' => $event
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $event
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error showing event: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading event'
+            ], 500);
+        }
     }
 
     /**
@@ -157,7 +172,7 @@ class EventController extends Controller
             'event_date' => 'sometimes|required|date',
             'color' => 'sometimes|required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'required|boolean',
+            'is_active' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -203,6 +218,10 @@ class EventController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error updating event: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating event: ' . $e->getMessage()
@@ -228,6 +247,10 @@ class EventController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error deleting event: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error deleting event: ' . $e->getMessage()
@@ -237,46 +260,82 @@ class EventController extends Controller
 
     /**
      * Process uploaded image and create three sizes.
+     * Compatible con Intervention Image v3
      */
     private function processImage($image): array
     {
-        $fileName = time() . '_' . uniqid();
-        $directory = 'events/images';
+        try {
+            $fileName = time() . '_' . uniqid();
+            $directory = 'events/images';
 
-        // Crear directorio si no existe
-        Storage::makeDirectory($directory);
+            // Crear directorio si no existe
+            if (!Storage::exists($directory)) {
+                Storage::makeDirectory($directory);
+            }
 
-        // Configurar Intervention Image con el driver GD
-        $manager = new ImageManager(new Driver());
+            // VERSIÓN PARA INTERVENTION IMAGE v3
+            if (class_exists('Intervention\Image\ImageManager')) {
+                $manager = new \Intervention\Image\ImageManager(
+                    new \Intervention\Image\Drivers\Gd\Driver()
+                );
 
-        // Procesar imagen pequeña (200x200)
-        $smallPath = $directory . '/' . $fileName . '_small.webp';
-        $img = $manager->read($image);
-        $img->resize(200, 200, function ($constraint) {
-            $constraint->aspectRatio();
-        });
-        Storage::put($smallPath, $img->toWebp(90));
+                // Procesar imagen pequeña (200x200)
+                $smallPath = $directory . '/' . $fileName . '_small.webp';
+                $img = $manager->read($image->getRealPath());
+                $img->scale(200, 200);
+                Storage::put($smallPath, $img->toWebp(90));
 
-        // Procesar imagen mediana (600x600)
-        $mediumPath = $directory . '/' . $fileName . '_medium.webp';
-        $img = $manager->read($image);
-        $img->resize(600, 600, function ($constraint) {
-            $constraint->aspectRatio();
-        });
-        Storage::put($mediumPath, $img->toWebp(90));
+                // Procesar imagen mediana (600x600)
+                $mediumPath = $directory . '/' . $fileName . '_medium.webp';
+                $img = $manager->read($image->getRealPath());
+                $img->scale(600, 600);
+                Storage::put($mediumPath, $img->toWebp(90));
 
-        // Procesar imagen grande (1200x1200)
-        $largePath = $directory . '/' . $fileName . '_large.webp';
-        $img = $manager->read($image);
-        $img->resize(1200, 1200, function ($constraint) {
-            $constraint->aspectRatio();
-        });
-        Storage::put($largePath, $img->toWebp(90));
+                // Procesar imagen grande (1200x1200)
+                $largePath = $directory . '/' . $fileName . '_large.webp';
+                $img = $manager->read($image->getRealPath());
+                $img->scale(1200, 1200);
+                Storage::put($largePath, $img->toWebp(90));
 
-        return [
-            'small' => $smallPath,
-            'medium' => $mediumPath,
-            'large' => $largePath,
-        ];
+                return [
+                    'small' => $smallPath,
+                    'medium' => $mediumPath,
+                    'large' => $largePath,
+                ];
+            }
+
+            // FALLBACK: Sin procesamiento de imagen (solo copia)
+            $originalPath = $directory . '/' . $fileName . '_original.' . $image->getClientOriginalExtension();
+            Storage::putFileAs($directory, $image, $fileName . '_original.' . $image->getClientOriginalExtension());
+
+            return [
+                'small' => $originalPath,
+                'medium' => $originalPath,
+                'large' => $originalPath,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error processing image: ' . $e->getMessage());
+            throw new \Exception('Failed to process image: ' . $e->getMessage());
+        }
+    }
+
+    // Métodos adicionales para filtros específicos
+    public function filterActive(Request $request): JsonResponse
+    {
+        $request->merge(['is_active' => true]);
+        return $this->index($request);
+    }
+
+    public function filterUpcoming(Request $request): JsonResponse
+    {
+        $request->merge(['upcoming' => true]);
+        return $this->index($request);
+    }
+
+    public function filterPast(Request $request): JsonResponse
+    {
+        $request->merge(['past' => true]);
+        return $this->index($request);
     }
 }

@@ -17,13 +17,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResource('events', EventController::class);
 
 // Rutas para eventos
-Route::prefix('events')->group(function () {
-    Route::get('/', [EventController::class, 'index']);
-    Route::post('/', [EventController::class, 'store']);
-    Route::get('/{event}', [EventController::class, 'show']);
-    Route::put('/{event}', [EventController::class, 'update']);
-    Route::delete('/{event}', [EventController::class, 'destroy']);
-});
+// Route::prefix('events')->group(function () {
+//     Route::get('/', [EventController::class, 'index']);
+//     Route::post('/', [EventController::class, 'store']);
+//     Route::get('/{event}', [EventController::class, 'show']);
+//     Route::put('/{event}', [EventController::class, 'update']);
+//     Route::delete('/{event}', [EventController::class, 'destroy']);
+// });
 
 // Rutas adicionales para eventos
 Route::prefix('events')->group(function () {

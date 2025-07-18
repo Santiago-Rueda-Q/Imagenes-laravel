@@ -93,5 +93,5 @@ class Event extends Model
         }
     }
 
-    
+
 }
