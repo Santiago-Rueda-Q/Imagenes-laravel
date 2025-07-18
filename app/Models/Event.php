@@ -37,6 +37,15 @@ class Event extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     */
+    protected $appends = [
+        'image_small_url',
+        'image_medium_url',
+        'image_large_url',
+    ];
+
+    /**
      * Scope para eventos próximos
      */
     public function scopeUpcoming($query)
@@ -65,7 +74,17 @@ class Event extends Model
      */
     public function getImageSmallUrlAttribute()
     {
-        return $this->image_small ? Storage::url($this->image_small) : null;
+        if (!$this->image_small) {
+            return null;
+        }
+
+        // Verificar si la imagen existe
+        if (!Storage::disk('public')->exists($this->image_small)) {
+            return null;
+        }
+
+        // CORRECCIÓN: Usar asset() en lugar de Storage::url()
+        return asset('storage/' . $this->image_small);
     }
 
     /**
@@ -73,7 +92,17 @@ class Event extends Model
      */
     public function getImageMediumUrlAttribute()
     {
-        return $this->image_medium ? Storage::url($this->image_medium) : null;
+        if (!$this->image_medium) {
+            return null;
+        }
+
+        // Verificar si la imagen existe
+        if (!Storage::disk('public')->exists($this->image_medium)) {
+            return null;
+        }
+
+        // CORRECCIÓN: Usar asset() en lugar de Storage::url()
+        return asset('storage/' . $this->image_medium);
     }
 
     /**
@@ -81,7 +110,17 @@ class Event extends Model
      */
     public function getImageLargeUrlAttribute()
     {
-        return $this->image_large ? Storage::url($this->image_large) : null;
+        if (!$this->image_large) {
+            return null;
+        }
+
+        // Verificar si la imagen existe
+        if (!Storage::disk('public')->exists($this->image_large)) {
+            return null;
+        }
+
+        // CORRECCIÓN: Usar asset() en lugar de Storage::url()
+        return asset('storage/' . $this->image_large);
     }
 
     /**
@@ -89,14 +128,14 @@ class Event extends Model
      */
     public function deleteImages()
     {
-        if ($this->image_small) {
-            Storage::delete($this->image_small);
+        if ($this->image_small && Storage::disk('public')->exists($this->image_small)) {
+            Storage::disk('public')->delete($this->image_small);
         }
-        if ($this->image_medium) {
-            Storage::delete($this->image_medium);
+        if ($this->image_medium && Storage::disk('public')->exists($this->image_medium)) {
+            Storage::disk('public')->delete($this->image_medium);
         }
-        if ($this->image_large) {
-            Storage::delete($this->image_large);
+        if ($this->image_large && Storage::disk('public')->exists($this->image_large)) {
+            Storage::disk('public')->delete($this->image_large);
         }
     }
 

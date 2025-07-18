@@ -58,17 +58,17 @@ class EventController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $transformedEvents,
-                'message' => 'Events loaded successfully'
+                'message' => 'Eventos cargados exitosamente',
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error loading events: ' . $e->getMessage(), [
+            Log::error('Error cargando eventos: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error loading events: ' . $e->getMessage(),
+                'message' => 'Error cargando eventos: ' . $e->getMessage(),
                 'data' => []
             ], 500);
         }
@@ -134,18 +134,18 @@ class EventController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Event created successfully',
+                'message' => 'Evento creado exitosamente',
                 'data' => $eventData
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Error creating event: ' . $e->getMessage(), [
+            Log::error('Error creando evento: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error creating event: ' . $e->getMessage()
+                'message' => 'Error creando evento: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -249,18 +249,18 @@ class EventController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Event updated successfully',
+                'message' => 'El evento se actualizó correctamente',
                 'data' => $eventData
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error updating event: ' . $e->getMessage(), [
+            Log::error('Error de actualizar el evento: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error updating event: ' . $e->getMessage()
+                'message' => 'Error de actualizar el evento: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -276,17 +276,17 @@ class EventController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Event deleted successfully'
+                'message' => 'Evento eliminado correctamente'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error deleting event: ' . $e->getMessage(), [
+            Log::error('Error eliminado evento: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting event: ' . $e->getMessage()
+                'message' => 'Error eliminado evento: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -298,25 +298,24 @@ class EventController extends Controller
     {
         try {
             $fileName = time() . '_' . uniqid();
+            $extension = $image->getClientOriginalExtension();
             $directory = 'events/images';
 
-            // Crear directorio si no existe
-            if (!Storage::exists($directory)) {
-                Storage::makeDirectory($directory);
-            }
-
-            // Fallback simple: solo guardar la imagen original
-            $extension = $image->getClientOriginalExtension();
+            // Usar el disco público para que las imágenes sean accesibles
             $originalPath = $directory . '/' . $fileName . '_original.' . $extension;
 
-            // Guardar imagen original
-            Storage::putFileAs($directory, $image, $fileName . '_original.' . $extension);
+            // Guardar imagen usando el disco público
+            $stored = Storage::disk('public')->putFileAs($directory, $image, $fileName . '_original.' . $extension);
+
+            if (!$stored) {
+                throw new \Exception('Failed to store image');
+            }
 
             // Para simplificar, usar la misma imagen para todos los tamaños
             return [
-                'small' => $originalPath,
-                'medium' => $originalPath,
-                'large' => $originalPath,
+                'small' => $stored,
+                'medium' => $stored,
+                'large' => $stored,
             ];
 
         } catch (\Exception $e) {
